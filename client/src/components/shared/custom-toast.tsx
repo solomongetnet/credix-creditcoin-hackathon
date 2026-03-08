@@ -5,7 +5,6 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useModalStore, useCustomToastStore } from "@/store/ui-store";
 import { motion, AnimatePresence } from "framer-motion";
-import { ERROR_MESSAGES } from "@/constants/error-codes";
 
 interface IProps {
   position?: "top" | "bottom";
@@ -24,7 +23,7 @@ export function CustomToastContainer({ position = "top", className }: IProps) {
     hideCustomToast();
   };
 
-  const toast = code ? ERROR_MESSAGES[code] : null;
+  const toast = code ? code : null;
 
   return (
     <AnimatePresence>
