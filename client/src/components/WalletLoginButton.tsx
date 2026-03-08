@@ -95,6 +95,7 @@ export const WalletLoginButton = ({
             openConnectModal,
             authenticationStatus,
             mounted,
+            
           }) => {
             const ready = mounted && authenticationStatus !== 'loading';
             const connected =
