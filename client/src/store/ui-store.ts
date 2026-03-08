@@ -1,4 +1,3 @@
-import { ERROR_CODES } from "@/constants/error-codes";
 import { create } from "zustand";
 
 interface ModalStore {
@@ -19,7 +18,7 @@ export const useModalStore = create<ModalStore>((set) => ({
           window.history.replaceState(
             null,
             "",
-            `${window.location.pathname}#pricing`
+            `${window.location.pathname}#pricing`,
           );
         }
       } else {
@@ -27,7 +26,7 @@ export const useModalStore = create<ModalStore>((set) => ({
           window.history.replaceState(
             null,
             "",
-            window.location.pathname + window.location.search
+            window.location.pathname + window.location.search,
           );
         }
       }
@@ -35,10 +34,7 @@ export const useModalStore = create<ModalStore>((set) => ({
   },
 }));
 
-const CUSTOM_TOAST_CODES = [
-  ERROR_CODES.GUEST_CHAT_LIMIT,
-  ERROR_CODES.PLAN_LIMIT,
-] as const;
+const CUSTOM_TOAST_CODES = ["GUEST_CHAT_LIMIT", "PLAN_LIMIT"] as const;
 
 // …and let TypeScript infer the union automatically.
 export type CustomToastCode = (typeof CUSTOM_TOAST_CODES)[number];
