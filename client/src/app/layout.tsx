@@ -30,10 +30,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  modal,
 }: Readonly<{
   children: React.ReactNode;
-  modal: any;
 }>) {
   return (
     <html lang="en">
@@ -70,7 +68,6 @@ export default function RootLayout({
           <Web3Provider>
             <SidebarProvider>
               {children}
-              {modal}
             </SidebarProvider>
           </Web3Provider>
         </ThemeProvider>
