@@ -23,7 +23,7 @@ export function CustomToastContainer({ position = "top", className }: IProps) {
     hideCustomToast();
   };
 
-  const toast = code ? code : null;
+  const toast: any = code ? code : null;
 
   return (
     <AnimatePresence>
