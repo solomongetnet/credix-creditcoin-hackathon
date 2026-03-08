@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  walletAddress String   @unique
+  name          String
+  username      String?  @unique
+  email         String?
+  emailVerified Boolean?
+  image         String?
+  upworkUrl     String?
+
+  portfolioUrl String?
+  CrediXScore  Float   @default(50)
+
+  loans         Loan[]
+  projects      Project[]
+  verifications ChainVerification[]
+  userBalances  UserBalance[]
+  contracts     SmartContractInteraction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserBalance {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  chain     String // "Creditcoin", "Ethereum", etc.
+  asset     String // "CCT", "ETH", "USDC", etc.
+  onChain   Boolean  @default(true) // true if synced from blockchain
+  balance   Float    @default(0) // mirrored value
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model CrediXScore {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  score           Float    @default(0)
+  onChainVerified Boolean  @default(false)
+  lastUpdated     DateTime @default(now()) @updatedAt
+}
+
+model Loan {
+  id             String     @id @default(cuid())
+  user           User       @relation(fields: [userId], references: [id])
+  userId         String
+  amount         Float
+  interestRate   Float
+  repaidAmount   Float      @default(0)
+  status         LoanStatus @default(PENDING)
+  createdAt      DateTime   @default(now())
+  dueDate        DateTime
+  repaidAt       DateTime?
+  contractTxHash String? // Reference to on-chain loan smart contract
+  loanPool       LoanPool?  @relation(fields: [loanPoolId], references: [id])
+  loanPoolId     String?
+}
+
+model LoanPool {
+  id             String   @id @default(cuid())
+  name           String // e.g., "CrediX Main Pool", "Partner Pool"
+  totalCapital   Float    @default(0) // Total funds available in the pool
+  totalLoaned    Float    @default(0) // Currently loaned out
+  totalRepaid    Float    @default(0) // Total repaid so far
+  totalDefaulted Float    @default(0) // Total defaulted
+  chain          String? // On-chain pool reference if applicable
+  contractTxHash String? // Optional on-chain contract reference
+  lastUpdated    DateTime @default(now()) @updatedAt
+  loans          Loan[] // Relation to Loan table
+}
+
+model PartnerCompany {
+  id            String  @id @default(cuid())
+  name          String
+  description   String?
+  walletAddress String? // On-chain address if they fund pools
+  totalFunded   Float   @default(0)
+  totalRepaid   Float   @default(0)
+  totalLoaned   Float   @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum LoanStatus {
+  PENDING
+  ACTIVE
+  REPAID
+  LATE
+  DEFAULTED
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  title       String
+  description String
+  amount      Float
+  chain       String? // "Ethereum", "Creditcoin", etc.
+  txHash      String? // On-chain transaction reference
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  rating      Int? // Optional rating by client or platform
+}
+
+model ChainVerification {
+  id         String             @id @default(cuid())
+  user       User               @relation(fields: [userId], references: [id])
+  userId     String
+  type       VerificationType
+  status     VerificationStatus @default(PENDING)
+  chain      String? // If on-chain verification
+  txHash     String? // On-chain transaction reference
+  createdAt  DateTime           @default(now())
+  verifiedAt DateTime?
+}
+
+model SmartContractInteraction {
+  id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  contractName String // CrediXWallet, CrediXLoanPool, CrediXScore, CrediXOracle
+  chain        String // "Ethereum", "Creditcoin", etc.
+  method       String // e.g., "mintLoan", "updateScore"
+  txHash       String // Transaction hash
+  data         Json? // Any input/output metadata
+  createdAt    DateTime @default(now())
+}
+
+enum VerificationType {
+  OFF_CHAIN_ID
+  ON_CHAIN_WALLET
+  CROSS_CHAIN_INCOME
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  FAILED
+}
